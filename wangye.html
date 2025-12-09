@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>动态翻牌赢奖励</title>
+    
     <style>
-        /* CSS 样式保持不变，确保美观 */
         body {
             display: flex;
             justify-content: center;
@@ -29,12 +29,12 @@
         .card {
             background-color: #ffffff;
             border-radius: 15px;
-            perspective: 1000px;
+            /* 核心CSS 1: 3D 透视效果 */
+            perspective: 1000px; 
             height: 200px;
             width: 100%;
             cursor: pointer;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-            /* 阻止在翻转过程中再次点击 */
             pointer-events: auto; 
         }
 
@@ -43,19 +43,24 @@
             width: 100%;
             height: 100%;
             text-align: center;
+            /* 核心CSS 2: 动画速度 */
             transition: transform 0.6s;
+            /* 核心CSS 3: 保持 3D 空间 */
             transform-style: preserve-3d;
         }
 
+        /* 核心CSS 4: 定义翻转状态 */
         .card.flipped .card-inner {
             transform: rotateY(180deg);
         }
 
+        /* 正面和背面样式 */
         .card-front, .card-back {
             position: absolute;
             width: 100%;
             height: 100%;
-            backface-visibility: hidden;
+            /* 核心CSS 5: 翻转时隐藏背面 */
+            backface-visibility: hidden; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -75,6 +80,7 @@
 
         .card-back {
             background-color: #FF9800; /* 橙色卡牌背面 */
+            /* 核心CSS 6: 初始将背面旋转 180 度藏起来 */
             transform: rotateY(180deg);
             font-size: 28px;
             color: #333;
@@ -121,7 +127,6 @@
     <button class="reset-button" onclick="resetGame()">手动重置卡牌</button>
 
     <script>
-        // 定义所有的奖励内容
         const rewards = [
             '🎁 棒棒糖 🍬',
             '🤫 上厕所特权 🚽',
@@ -134,25 +139,22 @@
         const totalCards = rewards.length;
         const gameBoard = document.getElementById('game-board');
 
-        // 辅助函数：Fisher-Yates 打乱算法
+        // 1. 打乱数组顺序
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]]; // 交换元素
+                [array[i], array[j]] = [array[j], array[i]]; 
             }
             return array;
         }
 
-        // 生成卡牌并添加到页面
+        // 2. 初始化/生成卡牌
         function initializeBoard() {
-            // 每次生成前清空旧的卡牌
             gameBoard.innerHTML = ''; 
             
-            // 打乱奖励顺序
             const shuffledRewards = shuffleArray([...rewards]); 
 
             for (let i = 0; i < totalCards; i++) {
-                // 创建卡牌 HTML 结构
                 const cardHTML = `
                     <div class="card" onclick="flipCard(this)">
                         <div class="card-inner">
@@ -163,41 +165,38 @@
                 `;
                 gameBoard.innerHTML += cardHTML;
             }
-            flippedCount = 0; // 重置计数器
+            flippedCount = 0; 
         }
 
-        // 翻转卡牌的函数
+        // 3. 翻转卡牌并计数
         function flipCard(cardElement) {
-            // 1. 如果卡牌已经被翻转，则忽略点击
             if (cardElement.classList.contains('flipped')) {
                 return;
             }
 
-            // 2. 翻转卡牌
+            // 核心：添加 'flipped' 类，触发 CSS 翻转动画
             cardElement.classList.add('flipped');
             flippedCount++;
 
-            // 3. 检查是否所有卡牌都已翻完
+            // 检查是否所有卡牌都已翻完
             if (flippedCount === totalCards) {
-                // 所有牌都翻完了，自动重置游戏
                 setTimeout(() => {
                     alert('本轮奖励已发完！卡牌将重置并打乱。');
                     resetGame();
-                }, 1000); // 1秒后执行重置
+                }, 1000);
             }
             
             // 阻止卡牌再次被点击
             cardElement.style.pointerEvents = 'none';
         }
         
-        // 重置游戏的函数
+        // 4. 重置游戏
         function resetGame() {
-            // 移除所有卡牌，然后重新生成
             initializeBoard(); 
             alert('卡牌已重置并打乱位置！');
         }
 
-        // 页面加载完成后立即初始化卡牌
+        // 页面加载完成后立即初始化
         document.addEventListener('DOMContentLoaded', initializeBoard);
     </script>
 
