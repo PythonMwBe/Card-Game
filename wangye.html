@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>知识翻牌赢奖励</title>
+    <title>动态翻牌赢奖励</title>
     <style>
-        /* 1. 设置页面基本样式 */
+        /* CSS 样式保持不变，确保美观 */
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f4f4f9; /* 浅灰色背景 */
+            background-color: #f4f4f9;
             font-family: 'Microsoft YaHei', sans-serif;
             flex-direction: column;
         }
 
-        /* 2. 容器和卡牌网格 */
         .card-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr); /* 5列布局 */
@@ -27,15 +26,16 @@
             padding: 20px;
         }
         
-        /* 3. 单个卡牌样式 */
         .card {
             background-color: #ffffff;
             border-radius: 15px;
-            perspective: 1000px; /* 3D 翻转效果的基础 */
-            height: 200px; /* 卡牌高度 */
+            perspective: 1000px;
+            height: 200px;
             width: 100%;
             cursor: pointer;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            /* 阻止在翻转过程中再次点击 */
+            pointer-events: auto; 
         }
 
         .card-inner {
@@ -43,21 +43,19 @@
             width: 100%;
             height: 100%;
             text-align: center;
-            transition: transform 0.6s; /* 翻转动画速度 */
+            transition: transform 0.6s;
             transform-style: preserve-3d;
         }
 
-        /* 4. 翻转状态 */
         .card.flipped .card-inner {
             transform: rotateY(180deg);
         }
 
-        /* 5. 卡牌正面（未翻面）和背面（奖励）的样式 */
         .card-front, .card-back {
             position: absolute;
             width: 100%;
             height: 100%;
-            backface-visibility: hidden; /* 隐藏背面的反面 */
+            backface-visibility: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -77,10 +75,10 @@
 
         .card-back {
             background-color: #FF9800; /* 橙色卡牌背面 */
-            transform: rotateY(180deg); /* 初始旋转 180 度藏起来 */
+            transform: rotateY(180deg);
             font-size: 28px;
             color: #333;
-            background-color: #FFFDE7; /* 浅黄色奖励背景 */
+            background-color: #FFFDE7;
             text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
         }
         
@@ -89,60 +87,118 @@
             margin-bottom: 30px;
         }
         
-        /* 媒体查询：适配较小的屏幕或白板 */
+        .reset-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+
+        .reset-button:hover {
+            background-color: #0056b3;
+        }
+
         @media (max-width: 1000px) {
             .card-container {
-                grid-template-columns: repeat(3, 1fr); /* 变为 3 列布局 */
+                grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>
 </head>
 <body>
 
-    <h1 class="title">🏆 知识翻牌赢奖励 🏆</h1>
+    <h1 class="title">🏆 动态翻牌赢奖励 🏆</h1>
     
-    <div class="card-container">
-        <div class="card" onclick="flipCard(this)">
-            <div class="card-inner">
-                <div class="card-front">1</div>
-                <div class="card-back">🎁 棒棒糖 🍬</div>
-            </div>
+    <div class="card-container" id="game-board">
         </div>
-
-        <div class="card" onclick="flipCard(this)">
-            <div class="card-inner">
-                <div class="card-front">2</div>
-                <div class="card-back">🤫 上厕所特权 🚽</div>
-            </div>
-        </div>
-
-        <div class="card" onclick="flipCard(this)">
-            <div class="card-inner">
-                <div class="card-front">3</div>
-                <div class="card-back">🍿 零食一份 🎉</div>
-            </div>
-        </div>
-
-        <div class="card" onclick="flipCard(this)">
-            <div class="card-inner">
-                <div class="card-front">4</div>
-                <div class="card-back">🍦 冰淇淋兑换券 🥳</div>
-            </div>
-        </div>
-
-        <div class="card" onclick="flipCard(this)">
-            <div class="card-inner">
-                <div class="card-front">5</div>
-                <div class="card-back">💪 再接再厉！下次好运 ✨</div>
-            </div>
-        </div>
-    </div>
     
+    <button class="reset-button" onclick="resetGame()">手动重置卡牌</button>
+
     <script>
-        // JavaScript 函数：点击时翻转卡牌
-        function flipCard(cardElement) {
-            cardElement.classList.toggle('flipped');
+        // 定义所有的奖励内容
+        const rewards = [
+            '🎁 棒棒糖 🍬',
+            '🤫 上厕所特权 🚽',
+            '🍿 零食一份 🎉',
+            '🍦 冰淇淋兑换券 🥳',
+            '💪 再接再厉！下次好运 ✨'
+        ];
+
+        let flippedCount = 0;
+        const totalCards = rewards.length;
+        const gameBoard = document.getElementById('game-board');
+
+        // 辅助函数：Fisher-Yates 打乱算法
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // 交换元素
+            }
+            return array;
         }
+
+        // 生成卡牌并添加到页面
+        function initializeBoard() {
+            // 每次生成前清空旧的卡牌
+            gameBoard.innerHTML = ''; 
+            
+            // 打乱奖励顺序
+            const shuffledRewards = shuffleArray([...rewards]); 
+
+            for (let i = 0; i < totalCards; i++) {
+                // 创建卡牌 HTML 结构
+                const cardHTML = `
+                    <div class="card" onclick="flipCard(this)">
+                        <div class="card-inner">
+                            <div class="card-front">${i + 1}</div>
+                            <div class="card-back">${shuffledRewards[i]}</div>
+                        </div>
+                    </div>
+                `;
+                gameBoard.innerHTML += cardHTML;
+            }
+            flippedCount = 0; // 重置计数器
+        }
+
+        // 翻转卡牌的函数
+        function flipCard(cardElement) {
+            // 1. 如果卡牌已经被翻转，则忽略点击
+            if (cardElement.classList.contains('flipped')) {
+                return;
+            }
+
+            // 2. 翻转卡牌
+            cardElement.classList.add('flipped');
+            flippedCount++;
+
+            // 3. 检查是否所有卡牌都已翻完
+            if (flippedCount === totalCards) {
+                // 所有牌都翻完了，自动重置游戏
+                setTimeout(() => {
+                    alert('本轮奖励已发完！卡牌将重置并打乱。');
+                    resetGame();
+                }, 1000); // 1秒后执行重置
+            }
+            
+            // 阻止卡牌再次被点击
+            cardElement.style.pointerEvents = 'none';
+        }
+        
+        // 重置游戏的函数
+        function resetGame() {
+            // 移除所有卡牌，然后重新生成
+            initializeBoard(); 
+            alert('卡牌已重置并打乱位置！');
+        }
+
+        // 页面加载完成后立即初始化卡牌
+        document.addEventListener('DOMContentLoaded', initializeBoard);
     </script>
 
 </body>
