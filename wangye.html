@@ -2,19 +2,28 @@
         // 10 个奖励内容
         const rewards = [
             '上厕所特权 🚽', 
-            // ... (其他 9 个奖励保持不变) ...
+            '上厕所特权 🚽', 
+            '棒棒糖 1 支 🍭', 
+            '一粒糖果 🍬', 
+            '一粒糖果 🍬', 
+            '两粒糖果 🍬🍬', 
+            '一包零食 🎉', 
+            '再接再厉！💪', // 关键词用于判断音效
+            '王牌 (特权大奖！) 👑', 
+            '王牌 (特权大奖！) 👑' 
         ];
         
         let flippedCount = 0;
         const totalCards = rewards.length;
-        
+        const gameBoard = document.getElementById('game-board'); 
+
         // 音效加载
-        const soundWin = new Audio('win.mp3');   
-        const soundFail = new Audio('fail.mp3'); 
+        const soundWin = new Audio('win.mp3');   // 成功音效 (抽中奖励)
+        const soundLose = new Audio('lose.mp3'); // 失败音效 (抽中再接再厉)
+        // 移除了 soundFail 和 soundReset 的定义
 
         // 1. 打乱数组顺序 (Fisher-Yates)
         function shuffleArray(array) {
-            // ... (函数内容保持不变) ...
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]]; 
@@ -22,19 +31,13 @@
             return array;
         }
 
-        // ****************************************************
-        // 2. 修正：将 gameBoard 的获取移到函数内部 (更安全)
-        // ****************************************************
+        // 2. 初始化/生成卡牌
         function initializeBoard() {
-            // 确保在执行操作前，再次获取元素，防止出现 null
-            const gameBoard = document.getElementById('game-board'); 
-            
-            // 致命错误检查：如果仍然找不到元素，则停止执行并报告错误
             if (!gameBoard) {
                 console.error("致命错误：找不到 ID 为 'game-board' 的元素。");
                 return; 
             }
-
+            
             gameBoard.innerHTML = ''; 
             
             const shuffledRewards = shuffleArray([...rewards]); 
@@ -54,9 +57,11 @@
                 gameBoard.innerHTML += cardHTML;
             }
             flippedCount = 0;
+            
+            // 移除 initializeBoard 中的所有重置音效调用
         }
 
-        // 3. 翻转卡牌并计数 (内容保持不变)
+        // 3. 翻转卡牌并计数
         function flipCard(cardElement, rewardText) {
             if (cardElement.classList.contains('flipped')) {
                 return;
@@ -65,30 +70,33 @@
             cardElement.classList.add('flipped');
             flippedCount++;
 
-            // 播放翻牌音效逻辑
+            // 播放音效逻辑
             if (rewardText.includes('再接再厉')) {
-                soundFail.play().catch(e => console.log("Fail sound blocked"));
+                // 抽到再接再厉，播放 lose.mp3
+                soundLose.play().catch(e => console.log("Lose sound blocked"));
             } else {
+                // 抽到奖励，播放 win.mp3
                 soundWin.play().catch(e => console.log("Win sound blocked"));
             }
 
-            // 自动重置逻辑
+            // 检查是否所有卡牌都已翻完 (自动重置逻辑，保留)
             if (flippedCount === totalCards) {
                 setTimeout(() => {
                     alert('本轮奖励已发完！卡牌将重置并打乱。');
-                    resetGame();
+                    resetGame(); // 自动调用重置
                 }, 1000);
             }
             
             cardElement.style.pointerEvents = 'none';
         }
         
-        // 4. 重置游戏 (移除重置音效)
+        // 4. 重置游戏 
         function resetGame() {
+            // 移除重置音效调用
             initializeBoard(); 
             alert('卡牌已重置并打乱位置！');
         }
 
-        // 确保在页面加载完成后初始化
+        // 页面加载完成后立即初始化
         document.addEventListener('DOMContentLoaded', initializeBoard);
     </script>
