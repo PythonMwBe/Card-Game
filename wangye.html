@@ -1,92 +1,85 @@
-<script>
-        // 10 个奖励内容 (略)
-        const rewards = [/* ... 10 个奖励内容 ... */];
-        
-        let flippedCount = 0;
-        const totalCards = rewards.length;
-        
-        // 音效加载
-        const soundWin = new Audio('win.mp3');   
-        const soundLose = new Audio('lose.mp3'); 
-
-        // 1. 打乱数组顺序 (Fisher-Yates)
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]]; 
-            }
-            return array;
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最终修复版：数字翻牌游戏 (10张)</title>
+    
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            font-family: 'Microsoft YaHei', sans-serif;
+            flex-direction: column;
         }
 
-        // 2. 初始化/生成卡牌
-        function initializeBoard() {
-            // **关键修复：尝试用 ID 查找，如果失败，尝试用 Class 查找**
-            let gameBoard = document.getElementById('game-board'); 
-
-            if (!gameBoard) {
-                // 如果 ID 查找失败，尝试用类名查找第一个匹配的元素
-                gameBoard = document.querySelector('.card-container');
-            }
-            
-            if (!gameBoard) {
-                console.error("致命错误：无法在文档中找到卡牌容器。请检查 ID='game-board' 和 class='card-container' 是否存在。");
-                return; 
-            }
-            
-            gameBoard.innerHTML = ''; 
-            
-            const shuffledRewards = shuffleArray([...rewards]); 
-
-            for (let i = 0; i < totalCards; i++) {
-                const cardNumber = i + 1; 
-                const rewardText = shuffledRewards[i];
-                
-                const cardHTML = `
-                    <div class="card" onclick="flipCard(this, '${rewardText}')"> 
-                        <div class="card-inner">
-                            <div class="card-front">${cardNumber}</div>
-                            <div class="card-back">${rewardText}</div>
-                        </div>
-                    </div>
-                `;
-                gameBoard.innerHTML += cardHTML;
-            }
-            flippedCount = 0;
-        }
-
-        // 3. 翻转卡牌并计数 (内容保持不变)
-        function flipCard(cardElement, rewardText) {
-            if (cardElement.classList.contains('flipped')) {
-                return;
-            }
-
-            cardElement.classList.add('flipped');
-            flippedCount++;
-
-            // 播放音效逻辑
-            if (rewardText.includes('再接再厉')) {
-                soundLose.play().catch(e => console.log("Lose sound blocked"));
-            } else {
-                soundWin.play().catch(e => console.log("Win sound blocked"));
-            }
-
-            // 自动重置逻辑
-            if (flippedCount === totalCards) {
-                setTimeout(() => {
-                    alert('本轮奖励已发完！卡牌将重置并打乱。');
-                    resetGame(); 
-                }, 1000);
-            }
-            
-            cardElement.style.pointerEvents = 'none';
+        .card-container {
+            /* 10 张牌，设置为 5 列 2 行布局 */
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+            padding: 20px;
+            /* **关键修复：确保容器居中对齐** */
+            margin: 0 auto;
+            justify-items: center; 
         }
         
-        // 4. 重置游戏 
-        function resetGame() {
-            initializeBoard(); 
-            alert('卡牌已重置并打乱位置！');
+        .card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            perspective: 1000px; /* 3D 透视 */
+            height: 200px; 
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            pointer-events: auto; 
         }
 
-        // 页面加载完成后，安全地执行初始化函数
-        document.addEventListener('DOMContentLoaded', initializeBoard);
-    </script>
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d; /* 保持 3D 空间 */
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg); /* 翻转动作 */
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden; /* 翻转时隐藏背面 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            font-size: 56px; 
+            font-weight: bold;
+            color: white;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 5px solid #fff;
+        }
+
+        .card-front {
+            background-color: #4CAF50; /* 绿色卡牌正面 */
+            z-index: 2;
+        }
+
+        .card-back {
+            transform: rotateY(180deg); /* 初始将背面藏起来 */
+            font-size: 24px; /* 奖励文字的字体大小 */
+            color: #333;
+            background-color: #FFFDE7;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+            line-height: 1
