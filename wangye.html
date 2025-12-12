@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数字翻牌赢奖励 (10张) - 无音效版</title>
+    <title>数字翻牌赢奖励 (10张)</title>
     
     <style>
         body {
@@ -25,14 +25,12 @@
             width: 90%;
             max-width: 1200px;
             padding: 20px;
-            margin: 0 auto; /* 确保容器居中对齐 */
-            justify-items: center; 
         }
         
         .card {
             background-color: #ffffff;
             border-radius: 15px;
-            perspective: 1000px; /* 3D 透视 */
+            perspective: 1000px; 
             height: 200px; 
             width: 100%;
             cursor: pointer;
@@ -46,22 +44,23 @@
             height: 100%;
             text-align: center;
             transition: transform 0.6s;
-            transform-style: preserve-3d; /* 保持 3D 空间 */
+            transform-style: preserve-3d;
         }
 
         .card.flipped .card-inner {
-            transform: rotateY(180deg); /* 翻转动作 */
+            transform: rotateY(180deg);
         }
 
         .card-front, .card-back {
             position: absolute;
             width: 100%;
             height: 100%;
-            backface-visibility: hidden; /* 翻转时隐藏背面 */
+            backface-visibility: hidden; 
             display: flex;
             justify-content: center;
             align-items: center;
             border-radius: 15px;
+            /* 增大数字或文字的字体大小 */
             font-size: 56px; 
             font-weight: bold;
             color: white;
@@ -71,12 +70,14 @@
         }
 
         .card-front {
-            background-color: #4CAF50; /* 绿色卡牌正面 */
+            background-color: #4CAF50; /* 绿色 */
             z-index: 2;
         }
 
+        /* 移除图片相关的 CSS */
+        
         .card-back {
-            transform: rotateY(180deg); /* 初始将背面藏起来 */
+            transform: rotateY(180deg);
             font-size: 24px; /* 奖励文字的字体大小 */
             color: #333;
             background-color: #FFFDE7;
@@ -89,9 +90,21 @@
             margin-bottom: 30px;
         }
         
-        /* 隐藏手动重置按钮，因为现在是自动重置 */
         .reset-button {
-            display: none; 
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+
+        .reset-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -101,26 +114,31 @@
     
     <div class="card-container" id="game-board">
         </div>
+    
+    <button class="reset-button" onclick="resetGame()">手动重置卡牌</button>
 
     <script>
         // 10 个奖励内容
         const rewards = [
-            '上厕所特权 🚽', 
-            '上厕所特权 🚽', 
-            '棒棒糖 1 支 🍭', 
-            '一粒糖果 🍬', 
-            '一粒糖果 🍬', 
-            '两粒糖果 🍬🍬', 
-            '一包零食 🎉', 
-            '再接再厉！💪', 
-            '王牌 (特权大奖！) 👑', 
-            '王牌 (特权大奖！) 👑' 
+            '上厕所特权 🚽', // 1
+            '上厕所特权 🚽', // 2
+            '棒棒糖 1 支 🍭', // 3
+            '一粒糖果 🍬', // 4
+            '一粒糖果 🍬', // 5
+            '两粒糖果 🍬🍬', // 6
+            '一包零食 🎉', // 7
+            '再接再厉！💪', // 8
+            '王牌 (特权大奖！) 👑', // 9
+            '王牌 (特权大奖！) 👑' // 10
         ];
         
+        // 移除 Labubu 图片数组，不再需要
+
         let flippedCount = 0;
-        const totalCards = rewards.length;
-        
-        // 1. 打乱数组顺序 (Fisher-Yates)
+        const totalCards = rewards.length; // 10
+        const gameBoard = document.getElementById('game-board');
+
+        // 1. 打乱数组顺序
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -131,33 +149,26 @@
 
         // 2. 初始化/生成卡牌
         function initializeBoard() {
-            const gameBoard = document.getElementById('game-board'); 
-            
-            if (!gameBoard) {
-                console.error("致命错误：找不到 ID 为 'game-board' 的元素。请检查 HTML 结构！");
-                return; 
-            }
-            
             gameBoard.innerHTML = ''; 
             
+            // 打乱奖励顺序
             const shuffledRewards = shuffleArray([...rewards]); 
 
             for (let i = 0; i < totalCards; i++) {
+                // 卡牌正面显示对应的数字 (i + 1)
                 const cardNumber = i + 1; 
-                const rewardText = shuffledRewards[i];
                 
-                // 注意：这里不再传递音效参数
                 const cardHTML = `
-                    <div class="card" onclick="flipCard(this)"> 
+                    <div class="card" onclick="flipCard(this)">
                         <div class="card-inner">
                             <div class="card-front">${cardNumber}</div>
-                            <div class="card-back">${rewardText}</div>
+                            <div class="card-back">${shuffledRewards[i]}</div>
                         </div>
                     </div>
                 `;
                 gameBoard.innerHTML += cardHTML;
             }
-            flippedCount = 0;
+            flippedCount = 0; 
         }
 
         // 3. 翻转卡牌并计数
@@ -169,28 +180,26 @@
             cardElement.classList.add('flipped');
             flippedCount++;
 
-            // 移除所有音效播放逻辑
-            
-            // 检查是否所有卡牌都已翻完 (自动重置逻辑，保留)
+            // 检查是否所有卡牌都已翻完 (10 张)
             if (flippedCount === totalCards) {
                 setTimeout(() => {
                     alert('本轮奖励已发完！卡牌将重置并打乱。');
-                    resetGame(); 
+                    resetGame();
                 }, 1000);
             }
             
             cardElement.style.pointerEvents = 'none';
         }
         
-        // 4. 重置游戏 
+        // 4. 重置游戏
         function resetGame() {
-            // 移除重置音效调用
             initializeBoard(); 
             alert('卡牌已重置并打乱位置！');
         }
 
-        // 页面加载完成后，安全地执行初始化函数
+        // 页面加载完成后立即初始化
         document.addEventListener('DOMContentLoaded', initializeBoard);
     </script>
+
 </body>
 </html>
