@@ -77,3 +77,120 @@
 
         .card-back {
             transform: rotateY(180deg); /* 初始将背面藏起来 */
+            font-size: 24px; /* 奖励文字的字体大小 */
+            color: #333;
+            background-color: #FFFDE7;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+            line-height: 1.3;
+        }
+        
+        .title {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        /* 隐藏手动重置按钮，因为现在是自动重置 */
+        .reset-button {
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="title">✨ 数字翻牌赢奖励 (10张) ✨</h1>
+    
+    <div class="card-container" id="game-board">
+        </div>
+
+    <script>
+        // 10 个奖励内容
+        const rewards = [
+            '上厕所特权 🚽', 
+            '上厕所特权 🚽', 
+            '棒棒糖 1 支 🍭', 
+            '一粒糖果 🍬', 
+            '一粒糖果 🍬', 
+            '两粒糖果 🍬🍬', 
+            '一包零食 🎉', 
+            '再接再厉！💪', 
+            '王牌 (特权大奖！) 👑', 
+            '王牌 (特权大奖！) 👑' 
+        ];
+        
+        let flippedCount = 0;
+        const totalCards = rewards.length;
+        
+        // 1. 打乱数组顺序 (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; 
+            }
+            return array;
+        }
+
+        // 2. 初始化/生成卡牌
+        function initializeBoard() {
+            const gameBoard = document.getElementById('game-board'); 
+            
+            if (!gameBoard) {
+                console.error("致命错误：找不到 ID 为 'game-board' 的元素。请检查 HTML 结构！");
+                return; 
+            }
+            
+            gameBoard.innerHTML = ''; 
+            
+            const shuffledRewards = shuffleArray([...rewards]); 
+
+            for (let i = 0; i < totalCards; i++) {
+                const cardNumber = i + 1; 
+                const rewardText = shuffledRewards[i];
+                
+                // 注意：这里不再传递音效参数
+                const cardHTML = `
+                    <div class="card" onclick="flipCard(this)"> 
+                        <div class="card-inner">
+                            <div class="card-front">${cardNumber}</div>
+                            <div class="card-back">${rewardText}</div>
+                        </div>
+                    </div>
+                `;
+                gameBoard.innerHTML += cardHTML;
+            }
+            flippedCount = 0;
+        }
+
+        // 3. 翻转卡牌并计数
+        function flipCard(cardElement) {
+            if (cardElement.classList.contains('flipped')) {
+                return;
+            }
+
+            cardElement.classList.add('flipped');
+            flippedCount++;
+
+            // 移除所有音效播放逻辑
+            
+            // 检查是否所有卡牌都已翻完 (自动重置逻辑，保留)
+            if (flippedCount === totalCards) {
+                setTimeout(() => {
+                    alert('本轮奖励已发完！卡牌将重置并打乱。');
+                    resetGame(); 
+                }, 1000);
+            }
+            
+            cardElement.style.pointerEvents = 'none';
+        }
+        
+        // 4. 重置游戏 
+        function resetGame() {
+            // 移除重置音效调用
+            initializeBoard(); 
+            alert('卡牌已重置并打乱位置！');
+        }
+
+        // 页面加载完成后，安全地执行初始化函数
+        document.addEventListener('DOMContentLoaded', initializeBoard);
+    </script>
+</body>
+</html>
